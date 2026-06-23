@@ -18,7 +18,9 @@ export default function PostCard({ post }: any) {
   // 🔥 LOAD LIKES + COMMENTS COUNT + USER LIKE STATE
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       // LIKES COUNT
       const { count: likes } = await supabase
@@ -35,6 +37,12 @@ export default function PostCard({ post }: any) {
         .eq("post_id", post.id);
 
       setCommentsCount(comments ?? 0);
+
+      // AUTO OPEN COMMENTS IF EXIST
+      if ((comments ?? 0) > 0) {
+        setShowComments(true);
+        loadComments();
+      }
 
       // CHECK IF USER LIKED
       if (user) {
@@ -54,7 +62,9 @@ export default function PostCard({ post }: any) {
 
   // ❤️ TOGGLE LIKE
   async function toggleLike() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) return alert("Tens de estar logado");
 
@@ -98,7 +108,9 @@ export default function PostCard({ post }: any) {
 
   // 💬 ADD COMMENT
   async function addComment() {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) return alert("Tens de estar logado");
     if (!newComment.trim()) return;
@@ -110,8 +122,12 @@ export default function PostCard({ post }: any) {
     });
 
     setNewComment("");
-    setCommentsCount((c) => c + 1); // 🔥 FIX HERE
+    setCommentsCount((c) => c + 1);
+
     loadComments();
+
+    // auto open after comment
+    setShowComments(true);
   }
 
   return (
@@ -152,12 +168,9 @@ export default function PostCard({ post }: any) {
           ❤️ {likesCount}
         </button>
 
-        {/* COMMENTS */}
+        {/* COMMENTS TOGGLE */}
         <button
-          onClick={() => {
-            setShowComments(!showComments);
-            if (!showComments) loadComments();
-          }}
+          onClick={() => setShowComments(!showComments)}
           className="text-zinc-400 hover:text-[#A855F7]"
         >
           💬 {commentsCount}
@@ -168,23 +181,6 @@ export default function PostCard({ post }: any) {
       {/* COMMENTS SECTION */}
       {showComments && (
         <div className="mt-4 space-y-3">
-
-          {/* INPUT */}
-          <div className="flex gap-2">
-            <input
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Escreve um comentário..."
-              className="flex-1 bg-zinc-900 border border-white/10 rounded px-2 py-1 text-sm"
-            />
-
-            <button
-              onClick={addComment}
-              className="px-3 py-1 bg-white text-black text-sm rounded"
-            >
-              Enviar
-            </button>
-          </div>
 
           {/* LIST */}
           <div className="space-y-2">
@@ -197,9 +193,25 @@ export default function PostCard({ post }: any) {
               </div>
             ))}
           </div>
-
         </div>
       )}
+
+      {/* COMMENT INPUT (ALWAYS VISIBLE) */}
+      <div className="flex gap-2 mt-4">
+        <input
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Escreve um comentário..."
+          className="flex-1 bg-zinc-900 border border-white/10 rounded px-2 py-1 text-sm"
+        />
+
+        <button
+          onClick={addComment}
+          className="px-3 py-1 bg-white text-black text-sm rounded"
+        >
+          Enviar
+        </button>
+      </div>
 
     </div>
   );

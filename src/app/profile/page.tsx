@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ProfilePage() {
   const supabase = createClient();
+  const router = useRouter();
 
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -63,11 +65,22 @@ export default function ProfilePage() {
     setSaving(false);
 
     if (error) {
+      if (
+        error.message ===
+        'duplicate key value violates unique constraint "profiles_username_key"'
+      ) {
+        alert("Username já existe! Escolhe outro. 🦈");
+        return;
+      }
+
       alert(error.message);
       return;
     }
 
     alert("Perfil atualizado com sucesso! 🦈");
+
+    router.push("/feed");
+    router.refresh();
   }
 
   if (loading) {
@@ -90,6 +103,7 @@ export default function ProfilePage() {
       {avatarUrl && (
         <img
           src={avatarUrl}
+          alt="avatar"
           className="w-24 h-24 rounded-full object-cover border border-white/10"
         />
       )}

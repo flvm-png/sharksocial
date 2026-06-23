@@ -11,8 +11,11 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const [user, setUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
     });
@@ -40,11 +43,12 @@ export default function Navbar() {
   }
 
   const linkClass = (path: string) =>
-    `transition ${
-      isActive(path)
-        ? "text-white font-semibold"
-        : "text-zinc-400 hover:text-[#A855F7]"
-    }`;
+    isActive(path)
+      ? "text-white font-semibold"
+      : "text-zinc-400 hover:text-[#A855F7]";
+
+  // 🔥 IMPORTANT: evita hydration mismatch
+  if (!mounted) return null;
 
   return (
     <header
@@ -79,16 +83,12 @@ export default function Navbar() {
               </Link>
 
               <Link href="/create" className={linkClass("/create")}>
-                Novo Post
+                Criar Post
               </Link>
 
               <button
                 onClick={logout}
-                className="
-                  text-[#F97316]
-                  hover:text-[#fb923c]
-                  transition
-                "
+                className="text-red-400 hover:text-red-300 transition"
               >
                 Logout
               </button>
