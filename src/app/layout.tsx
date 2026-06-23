@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   title: "SharkSocial",
   description: "Rede social da comunidade SharkCoders",
   icons: {
-    icon: "/logo.svg",
+    icon: [
+      { url: "/logo.png" }
+    ]
   },
 };
 
