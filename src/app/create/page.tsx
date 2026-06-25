@@ -9,8 +9,35 @@ export default function CreatePostPage() {
   const router = useRouter();
 
   const [content, setContent] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+
+  async function uploadImage(file: File, userId: string) {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${userId}-${Date.now()}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from("post-images")
+      .upload(fileName, file);
+
+    if (error) throw error;
+
+    const { data } = supabase.storage
+      .from("post-images")
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  }
 
   async function handleCreatePost() {
     setLoading(true);
@@ -26,36 +53,40 @@ export default function CreatePostPage() {
       return;
     }
 
-    // validation
     if (!content.trim()) {
       alert("O post não pode estar vazio");
       setLoading(false);
       return;
     }
 
-    const { error } = await supabase.from("posts").insert({
-      user_id: user.id,
-      content,
-      image_url: imageUrl || null,
-    });
+    let imageUrl = null;
 
-    setLoading(false);
+    try {
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile, user.id);
+      }
 
-    if (error) {
-      console.error(error);
-      alert(error.message);
-      return;
+      const { error } = await supabase.from("posts").insert({
+        user_id: user.id,
+        content,
+        image_url: imageUrl,
+      });
+
+      if (error) throw error;
+
+      router.push("/feed");
+      router.refresh();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message);
     }
 
-    router.push("/feed");
-    router.refresh();
+    setLoading(false);
   }
 
   return (
     <div className="max-w-xl mx-auto mt-10 text-white">
-      <h1 className="text-3xl font-semibold mb-6">
-        Criar Post 🦈
-      </h1>
+      <h1 className="text-3xl font-semibold mb-6">Criar Post 🦈</h1>
 
       <div className="space-y-4">
 
@@ -67,24 +98,53 @@ export default function CreatePostPage() {
           className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 min-h-[120px]"
         />
 
-        {/* IMAGE URL (OPTIONAL) */}
-        <input
-          type="text"
-          placeholder="URL da imagem (opcional)"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2"
-        />
+        {/* IMAGE UPLOAD */}
+        <div className="flex items-center gap-3">
+          {/* BOTÃO CUSTOM */}
+            <label className="cursor-pointer bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-zinc-200 transition">
+              Procurar
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </label>
+
+          {/* TEXTO DO ESTADO */}
+          <span className="text-sm text-zinc-400">
+            {imageFile ? imageFile.name : "Nenhum ficheiro selecionado"}
+          </span>
+        </div>
+
+        {/* PREVIEW */}
+        {imagePreview && (
+          <img
+            src={imagePreview}
+            className="rounded-lg max-h-[300px] object-cover"
+          />
+        )}
 
         {/* BUTTON */}
         <button
           onClick={handleCreatePost}
           disabled={loading}
-          className="w-full bg-white text-black font-medium py-2 rounded-lg hover:bg-zinc-200 transition"
+          className="
+            w-full
+            bg-orange-500
+            text-white
+            font-medium
+            py-2
+            rounded-lg
+            hover:bg-orange-600
+            transition
+            shadow-md
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+          "
         >
           {loading ? "A publicar..." : "Publicar"}
         </button>
-
       </div>
     </div>
   );

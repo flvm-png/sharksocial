@@ -43,9 +43,9 @@ export default function Navbar() {
   }
 
   const linkClass = (path: string) =>
-    isActive(path)
-      ? "text-white font-semibold"
-      : "text-zinc-400 hover:text-[#A855F7]";
+  isActive(path)
+    ? "text-orange-500 font-semibold drop-shadow-sm"
+    : "text-zinc-400 hover:text-orange-400 transition";
 
   // 🔥 IMPORTANT: evita hydration mismatch
   if (!mounted) return null;
@@ -64,7 +64,15 @@ export default function Navbar() {
         {/* LOGO */}
         <Link
           href="/"
-          className="text-white font-bold text-xl tracking-wide"
+          className="
+            text-orange-500
+            font-bold
+            text-xl
+            tracking-wide
+            hover:text-orange-400
+            transition
+            drop-shadow-sm
+          "
         >
           SharkSocial
         </Link>

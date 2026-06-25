@@ -160,11 +160,23 @@ export default function ProfilePage() {
         />
       </div>
 
-      {/* BOTÃO SAVE */}
+      {/* BOTÃO SAVE (ORANGE STYLE) */}
       <button
         onClick={saveProfile}
         disabled={saving}
-        className="w-full bg-white text-black font-medium py-2 rounded-lg hover:bg-zinc-200 transition"
+        className="
+          w-full
+          bg-orange-500
+          text-white
+          font-medium
+          py-2
+          rounded-lg
+          hover:bg-orange-600
+          transition
+          shadow-md
+          disabled:opacity-50
+          disabled:cursor-not-allowed
+        "
       >
         {saving ? "A guardar..." : "Guardar perfil"}
       </button>
