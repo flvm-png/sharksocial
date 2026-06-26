@@ -8,7 +8,6 @@ export default function ProfilePage() {
   const supabase = createClient();
   const router = useRouter();
 
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -17,40 +16,41 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
 
+  const inputClass =
+    "w-full rounded-lg bg-orange-950/40 border border-orange-300/20 px-3 py-2 text-white placeholder:text-orange-200/50";
+
   useEffect(() => {
-    async function loadProfile() {
+    async function load() {
       const { data: auth } = await supabase.auth.getUser();
 
       if (!auth.user) {
-        window.location.href = "/login";
+        router.push("/login");
         return;
       }
 
-      setUser(auth.user);
-
-      const { data: profile } = await supabase
+      const { data } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", auth.user.id)
         .single();
 
-      if (profile) {
-        setUsername(profile.username ?? "");
-        setFullName(profile.full_name ?? "");
-        setBio(profile.bio ?? "");
-        setAvatarUrl(profile.avatar_url ?? "");
+      if (data) {
+        setUsername(data.username ?? "");
+        setFullName(data.full_name ?? "");
+        setBio(data.bio ?? "");
+        setAvatarUrl(data.avatar_url ?? "");
       }
 
       setLoading(false);
     }
 
-    loadProfile();
+    load();
   }, []);
 
-  async function saveProfile() {
-    if (!user) return;
-
+  async function save() {
     setSaving(true);
+
+    const { data: auth } = await supabase.auth.getUser();
 
     const { error } = await supabase
       .from("profiles")
@@ -60,127 +60,37 @@ export default function ProfilePage() {
         bio,
         avatar_url: avatarUrl,
       })
-      .eq("id", user.id);
+      .eq("id", auth.user!.id);
 
     setSaving(false);
 
     if (error) {
-      if (
-        error.message ===
-        'duplicate key value violates unique constraint "profiles_username_key"'
-      ) {
-        alert("Username já existe! Escolhe outro. 🦈");
-        return;
-      }
-
       alert(error.message);
       return;
     }
 
-    alert("Perfil atualizado com sucesso! 🦈");
-
+    alert("Perfil atualizado 🦈");
     router.push("/feed");
-    router.refresh();
   }
 
-  if (loading) {
-    return (
-      <div className="max-w-xl mx-auto px-4 py-10 text-white">
-        A carregar perfil...
-      </div>
-    );
-  }
+  if (loading) return <div className="text-white">A carregar...</div>;
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-10 text-white space-y-5">
+    <div className="max-w-xl mx-auto text-white space-y-4">
+      <h1 className="text-2xl">Perfil</h1>
 
-      {/* TÍTULO */}
-      <h1 className="text-3xl font-bold">
-        O teu perfil 🦈
-      </h1>
+      <input className={inputClass} value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" />
+      <input className={inputClass} value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="nome" />
+      <textarea className={inputClass} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="bio" />
+      <input className={inputClass} value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="avatar url" />
 
-      {/* AVATAR PREVIEW */}
-      {avatarUrl && (
-        <img
-          src={avatarUrl}
-          alt="avatar"
-          className="w-24 h-24 rounded-full object-cover border border-white/10"
-        />
-      )}
-
-      {/* USERNAME */}
-      <div>
-        <label className="text-sm text-zinc-400">
-          Username
-        </label>
-        <input
-          className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2"
-          placeholder="ex: nuno123"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </div>
-
-      {/* NOME COMPLETO */}
-      <div>
-        <label className="text-sm text-zinc-400">
-          Nome completo
-        </label>
-        <input
-          className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2"
-          placeholder="O teu nome"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-        />
-      </div>
-
-      {/* BIO */}
-      <div>
-        <label className="text-sm text-zinc-400">
-          Bio
-        </label>
-        <textarea
-          className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2 min-h-[100px]"
-          placeholder="Escreve algo sobre ti..."
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-        />
-      </div>
-
-      {/* AVATAR URL */}
-      <div>
-        <label className="text-sm text-zinc-400">
-          URL do avatar
-        </label>
-        <input
-          className="w-full bg-zinc-900 border border-white/10 rounded-lg px-3 py-2"
-          placeholder="https://..."
-          value={avatarUrl}
-          onChange={(e) => setAvatarUrl(e.target.value)}
-        />
-      </div>
-
-      {/* BOTÃO SAVE (ORANGE STYLE) */}
       <button
-        onClick={saveProfile}
+        onClick={save}
         disabled={saving}
-        className="
-          w-full
-          bg-orange-500
-          text-white
-          font-medium
-          py-2
-          rounded-lg
-          hover:bg-orange-600
-          transition
-          shadow-md
-          disabled:opacity-50
-          disabled:cursor-not-allowed
-        "
+        className="w-full bg-orange-500 py-2 rounded-lg"
       >
-        {saving ? "A guardar..." : "Guardar perfil"}
+        {saving ? "A guardar..." : "Guardar"}
       </button>
-
     </div>
   );
 }

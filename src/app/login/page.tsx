@@ -46,27 +46,13 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto mt-10 text-white">
-
-      <h1 className="text-3xl font-semibold mb-6">
-        Login
-      </h1>
+      <h1 className="text-3xl font-semibold mb-6">Login</h1>
 
       <div className="space-y-4">
-
         <input
           type="email"
           placeholder="Email"
-          className="
-            w-full
-            rounded-lg
-            bg-orange-950/40
-            border
-            border-orange-300/20
-            px-3
-            py-2
-            text-white
-            placeholder:text-orange-200/50
-          "
+          className="w-full rounded-lg bg-orange-950/40 border border-orange-300/20 px-3 py-2 text-white placeholder:text-orange-200/50"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -74,17 +60,7 @@ export default function LoginPage() {
         <input
           type="password"
           placeholder="Password"
-          className="
-            w-full
-            rounded-lg
-            bg-orange-950/40
-            border
-            border-orange-300/20
-            px-3
-            py-2
-            text-white
-            placeholder:text-orange-200/50
-          "
+          className="w-full rounded-lg bg-orange-950/40 border border-orange-300/20 px-3 py-2 text-white placeholder:text-orange-200/50"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -92,22 +68,12 @@ export default function LoginPage() {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="
-            w-full
-            rounded-lg
-            bg-orange-500
-            hover:bg-orange-400
-            text-white
-            font-medium
-            py-2
-            transition
-          "
+          className="w-full rounded-lg bg-orange-500 hover:bg-orange-400 text-white font-medium py-2 transition"
         >
           {loading ? "A entrar..." : "Entrar"}
         </button>
 
         {/* DIVIDER */}
-
         <div className="relative py-2">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-orange-300/20" />
@@ -120,24 +86,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* GOOGLE */}
-
+        {/* GOOGLE LOGIN */}
         <button
           onClick={handleGoogleLogin}
-          className="
-            w-full
-            rounded-lg
-            bg-white
-            text-black
-            font-medium
-            py-2
-            hover:bg-zinc-100
-            transition
-          "
+          className="w-full rounded-lg bg-white text-black font-medium py-2 hover:bg-zinc-100 transition"
         >
           Entrar com Google
         </button>
-
       </div>
     </div>
   );
