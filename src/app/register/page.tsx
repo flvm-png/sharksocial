@@ -71,7 +71,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/feed`,
+      redirectTo: `${window.location.origin}/auth/callback`,
     },
   });
 
@@ -79,6 +79,8 @@ export default function RegisterPage() {
     console.error(error);
     alert(error.message);
   }
+
+  console.log("Conta criada! Completa o teu perfil.");
 }
 
   return (
