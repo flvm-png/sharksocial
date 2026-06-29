@@ -12,23 +12,25 @@ export default async function PublicProfile({
 
   const supabase = await createClient();
 
-  // 👤 user logado
+  // user logado
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 🔎 perfil (IMPORTANTE: inclui user_id)
+  // perfil (SAFE)
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, user_id, username, full_name, avatar_url, bio, created_at")
+    .select("*")
     .eq("username", username)
-    .single();
+    .maybeSingle();
 
   if (!profile) {
     notFound();
   }
 
-  // 📌 posts
+  const profileId = profile.id; // ⚠️ usa SEMPRE id (mais seguro)
+
+  // posts
   const { data: posts } = await supabase
     .from("posts")
     .select(`
@@ -42,10 +44,10 @@ export default async function PublicProfile({
         avatar_url
       )
     `)
-    .eq("user_id", profile.user_id)
+    .eq("user_id", profileId)
     .order("created_at", { ascending: false });
 
-  // ❤️ check follow
+  // follow check
   let isFollowing = false;
 
   if (user) {
@@ -53,7 +55,7 @@ export default async function PublicProfile({
       .from("follows")
       .select("*")
       .eq("follower_id", user.id)
-      .eq("following_id", profile.user_id)
+      .eq("following_id", profileId)
       .maybeSingle();
 
     isFollowing = !!follow;
@@ -96,23 +98,23 @@ export default async function PublicProfile({
               {new Date(profile.created_at).toLocaleDateString("pt-PT")}
             </p>
 
-            {/* ❤️ FOLLOW BUTTON */}
-            {user && user.id !== profile.user_id && (
+            {/* FOLLOW BUTTON */}
+            {user && user.id !== profileId && (
               <form
                 action={toggleFollow.bind(
                   null,
                   user.id,
-                  profile.user_id,
+                  profileId,
                   isFollowing
                 )}
               >
                 <button
                   className={`
-                    mt-4 px-4 py-2 rounded-lg text-sm font-semibold transition
+                    mt-4 px-4 py-2 rounded-lg text-sm font-semibold
                     ${
                       isFollowing
                         ? "bg-zinc-700 text-white"
-                        : "bg-orange-500 text-white hover:bg-orange-600"
+                        : "bg-orange-500 text-white"
                     }
                   `}
                 >
