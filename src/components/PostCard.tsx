@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 export default function PostCard({ post }: any) {
   const supabase = createClient();
@@ -135,7 +136,12 @@ export default function PostCard({ post }: any) {
 
       {/* USER */}
       <div className="text-xs text-[#A855F7] mb-2">
-        @{post.profiles?.username ?? "user"}
+        <Link
+          href={`/${post.profiles.username}`}
+          className="flex items-center gap-3"
+        >
+          @{post.profiles.username}
+        </Link>
       </div>
 
       {/* CONTENT */}
