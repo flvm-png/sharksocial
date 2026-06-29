@@ -27,7 +27,7 @@ export default function RootLayout({
           flex
           flex-col
           text-white
-          bg-gradient-to-b
+          bg-black
           from-[#FB923C]
           via-[#EA580C]
           to-[#9A3412]
