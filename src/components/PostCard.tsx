@@ -137,7 +137,7 @@ export default function PostCard({ post }: any) {
       {/* USER */}
       <div className="text-xs text-[#A855F7] mb-2">
         <Link
-          href={`/${post.profiles.username}`}
+          href={`/u/${post.profiles.username}`}
           className="flex items-center gap-3"
         >
           @{post.profiles.username}
