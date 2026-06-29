@@ -12,25 +12,20 @@ export default async function PublicProfile({
 
   const supabase = await createClient();
 
-  // user logado
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // perfil (SAFE)
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
     .eq("username", username)
-    .maybeSingle();
+    .single();
 
-  if (!profile) {
-    notFound();
-  }
+  if (!profile) notFound();
 
-  const profileId = profile.id; // ⚠️ usa SEMPRE id (mais seguro)
+  const profileId = profile.id; // ✅ FIX IMPORTANTE
 
-  // posts
   const { data: posts } = await supabase
     .from("posts")
     .select(`
@@ -47,7 +42,6 @@ export default async function PublicProfile({
     .eq("user_id", profileId)
     .order("created_at", { ascending: false });
 
-  // follow check
   let isFollowing = false;
 
   if (user) {
@@ -64,7 +58,6 @@ export default async function PublicProfile({
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 text-white">
 
-      {/* HEADER */}
       <div className="rounded-xl border border-white/10 bg-zinc-900 p-6 mb-8">
 
         <div className="flex items-center gap-5">
@@ -74,7 +67,7 @@ export default async function PublicProfile({
               profile.avatar_url ||
               `https://ui-avatars.com/api/?name=${profile.username}`
             }
-            className="w-24 h-24 rounded-full object-cover"
+            className="w-24 h-24 rounded-full"
           />
 
           <div className="flex-1">
@@ -87,18 +80,12 @@ export default async function PublicProfile({
               @{profile.username}
             </p>
 
-            {profile.bio && (
-              <p className="mt-3 text-zinc-300">
-                {profile.bio}
-              </p>
-            )}
-
-            <p className="mt-3 text-sm text-zinc-500">
+            <p className="text-sm text-zinc-500 mt-3">
               Membro desde{" "}
               {new Date(profile.created_at).toLocaleDateString("pt-PT")}
             </p>
 
-            {/* FOLLOW BUTTON */}
+            {/* 🔥 FOLLOW BUTTON FINAL */}
             {user && user.id !== profileId && (
               <form
                 action={toggleFollow.bind(
@@ -109,14 +96,11 @@ export default async function PublicProfile({
                 )}
               >
                 <button
-                  className={`
-                    mt-4 px-4 py-2 rounded-lg text-sm font-semibold
-                    ${
-                      isFollowing
-                        ? "bg-zinc-700 text-white"
-                        : "bg-orange-500 text-white"
-                    }
-                  `}
+                  className={`mt-4 px-4 py-2 rounded-lg text-sm font-semibold ${
+                    isFollowing
+                      ? "bg-zinc-700"
+                      : "bg-orange-500 hover:bg-orange-600"
+                  }`}
                 >
                   {isFollowing ? "Following" : "Follow"}
                 </button>
@@ -124,15 +108,10 @@ export default async function PublicProfile({
             )}
 
           </div>
-
         </div>
-
       </div>
 
-      {/* POSTS */}
-      <h2 className="text-xl font-semibold mb-4">
-        Posts recentes
-      </h2>
+      <h2 className="text-xl font-semibold mb-4">Posts recentes</h2>
 
       {posts?.length ? (
         <div className="space-y-4">
@@ -141,11 +120,10 @@ export default async function PublicProfile({
           ))}
         </div>
       ) : (
-        <div className="border border-white/10 rounded-lg bg-zinc-900 p-5 text-zinc-400">
+        <div className="text-zinc-400">
           Este utilizador ainda não publicou nada.
         </div>
       )}
-
     </div>
   );
 }
