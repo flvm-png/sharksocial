@@ -24,7 +24,7 @@ export default async function PublicProfile({
 
   if (!profile) notFound();
 
-  const profileId = profile.id; // ✅ FIX IMPORTANTE
+  const profileUserId = profile.user_id; // ✅ FIX IMPORTANTE
 
   const { data: posts } = await supabase
     .from("posts")
@@ -85,13 +85,22 @@ export default async function PublicProfile({
               {new Date(profile.created_at).toLocaleDateString("pt-PT")}
             </p>
 
+
+            <div className="text-xs text-red-400">
+              user.id: {user?.id}
+              <br />
+              profile.id: {profile.id}
+              <br />
+              profile.user_id: {profile.user_id}
+            </div>
+
             {/* 🔥 FOLLOW BUTTON FINAL */}
-            {user && user.id !== profileId && (
+            {user && user.id !== profileUserId && (
               <form
                 action={toggleFollow.bind(
                   null,
                   user.id,
-                  profileId,
+                  profileUserId,
                   isFollowing
                 )}
               >
