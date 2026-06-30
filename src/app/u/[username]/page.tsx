@@ -1,22 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import PostCard from "@/components/PostCard";
+import { toggleFollow } from "@/app/actions/follow";
 
 export default async function PublicProfile({
   params,
 }: {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }) {
-  const { username } = params;
+  const { username } = await params;
 
   const supabase = await createClient();
 
-  // 👤 user logado (opcional)
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 👇 perfil
+  // 👇 Buscar perfil pelo username
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -25,9 +25,10 @@ export default async function PublicProfile({
 
   if (!profile) notFound();
 
+  // ⭐ IMPORTANTE: assumimos que profiles.id = auth.users.id
   const profileId = profile.id;
 
-  // 👇 posts
+  // 👇 Buscar posts do utilizador
   const { data: posts } = await supabase
     .from("posts")
     .select(`
@@ -44,10 +45,24 @@ export default async function PublicProfile({
     .eq("user_id", profileId)
     .order("created_at", { ascending: false });
 
+  // 👇 Verificar follow
+  let isFollowing = false;
+
+  if (user) {
+    const { data: follow } = await supabase
+      .from("follows")
+      .select("*")
+      .eq("follower_id", user.id)
+      .eq("following_id", profileId)
+      .maybeSingle();
+
+    isFollowing = !!follow;
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 text-white">
 
-      {/* PROFILE */}
+      {/* PROFILE CARD */}
       <div className="rounded-xl border border-white/10 bg-zinc-900 p-6 mb-8">
         <div className="flex items-center gap-5">
 
@@ -77,9 +92,7 @@ export default async function PublicProfile({
       </div>
 
       {/* POSTS */}
-      <h2 className="text-xl font-semibold mb-4">
-        Posts recentes
-      </h2>
+      <h2 className="text-xl font-semibold mb-4">Posts recentes</h2>
 
       {posts?.length ? (
         <div className="space-y-4">
