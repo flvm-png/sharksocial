@@ -24,7 +24,7 @@ export default async function PublicProfile({
 
   if (!profile) notFound();
 
-  const profileUserId = profile.user_id; // ✅ FIX IMPORTANTE
+  const profileId = profile.user_id; // ✅ FIX IMPORTANTE
 
   const { data: posts } = await supabase
     .from("posts")
@@ -39,7 +39,7 @@ export default async function PublicProfile({
         avatar_url
       )
     `)
-    .eq("user_id", profileUserId)
+    .eq("user_id", profileId)
     .order("created_at", { ascending: false });
 
   let isFollowing = false;
@@ -49,7 +49,7 @@ export default async function PublicProfile({
       .from("follows")
       .select("*")
       .eq("follower_id", user.id)
-      .eq("following_id", profileUserId)
+      .eq("following_id", profileId)
       .maybeSingle();
 
     isFollowing = !!follow;
@@ -85,22 +85,18 @@ export default async function PublicProfile({
               {new Date(profile.created_at).toLocaleDateString("pt-PT")}
             </p>
 
-
-            <div className="text-xs text-red-400">
-              user.id: {user?.id}
-              <br />
-              profile.id: {profile.id}
-              <br />
-              profile.user_id: {profile.user_id}
-            </div>
+            <div className="mb-4 text-sm text-zinc-400">
+  <p>User: {user ? user.id : "NULL"}</p>
+  <p>Profile: {profileId}</p>
+</div>
 
             {/* 🔥 FOLLOW BUTTON FINAL */}
-            {user && user.id !== profileUserId && (
+            {user && user.id !== profileId && (
               <form
                 action={toggleFollow.bind(
                   null,
                   user.id,
-                  profileUserId,
+                  profileId,
                   isFollowing
                 )}
               >
