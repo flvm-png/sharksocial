@@ -16,6 +16,7 @@ export default async function PublicProfile({
     data: { user },
   } = await supabase.auth.getUser();
 
+  // 👇 Buscar perfil pelo username
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -24,8 +25,10 @@ export default async function PublicProfile({
 
   if (!profile) notFound();
 
-  const profileId = profile.user_id; // ✅ FIX IMPORTANTE
+  // ⭐ IMPORTANTE: assumimos que profiles.id = auth.users.id
+  const profileId = profile.id;
 
+  // 👇 Buscar posts do utilizador
   const { data: posts } = await supabase
     .from("posts")
     .select(`
@@ -42,6 +45,7 @@ export default async function PublicProfile({
     .eq("user_id", profileId)
     .order("created_at", { ascending: false });
 
+  // 👇 Verificar follow
   let isFollowing = false;
 
   if (user) {
@@ -58,8 +62,8 @@ export default async function PublicProfile({
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 text-white">
 
+      {/* PROFILE CARD */}
       <div className="rounded-xl border border-white/10 bg-zinc-900 p-6 mb-8">
-
         <div className="flex items-center gap-5">
 
           <img
@@ -71,7 +75,6 @@ export default async function PublicProfile({
           />
 
           <div className="flex-1">
-
             <h1 className="text-3xl font-bold">
               {profile.full_name || profile.username}
             </h1>
@@ -85,12 +88,14 @@ export default async function PublicProfile({
               {new Date(profile.created_at).toLocaleDateString("pt-PT")}
             </p>
 
-            <div className="mb-4 text-sm text-zinc-400">
-  <p>User: {user ? user.id : "NULL"}</p>
-  <p>Profile: {profileId}</p>
-</div>
+            {/* 🐞 DEBUG TEMPORÁRIO — APAGAR DEPOIS */}
+            <div className="mt-3 text-xs text-red-400 border border-red-500/30 p-2 rounded">
+              <p>DEBUG (apagar depois)</p>
+              <p>user.id: {user?.id || "NULL"}</p>
+              <p>profile.id: {profileId}</p>
+            </div>
 
-            {/* 🔥 FOLLOW BUTTON FINAL */}
+            {/* 🔥 FOLLOW BUTTON */}
             {user && user.id !== profileId && (
               <form
                 action={toggleFollow.bind(
@@ -101,7 +106,7 @@ export default async function PublicProfile({
                 )}
               >
                 <button
-                  className={`mt-4 px-4 py-2 rounded-lg text-sm font-semibold ${
+                  className={`mt-4 px-4 py-2 rounded-lg text-sm font-semibold transition ${
                     isFollowing
                       ? "bg-zinc-700"
                       : "bg-orange-500 hover:bg-orange-600"
@@ -111,11 +116,11 @@ export default async function PublicProfile({
                 </button>
               </form>
             )}
-
           </div>
         </div>
       </div>
 
+      {/* POSTS */}
       <h2 className="text-xl font-semibold mb-4">Posts recentes</h2>
 
       {posts?.length ? (
