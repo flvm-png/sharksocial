@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import PostCard from "@/components/PostCard";
-import { toggleFollow } from "@/app/actions/follow";
 
 export default async function PublicProfile({
   params,
