@@ -44,20 +44,6 @@ export default async function PublicProfile({
     .eq("user_id", profileId)
     .order("created_at", { ascending: false });
 
-  // 👇 Verificar follow
-  let isFollowing = false;
-
-  if (user) {
-    const { data: follow } = await supabase
-      .from("follows")
-      .select("*")
-      .eq("follower_id", user.id)
-      .eq("following_id", profileId)
-      .maybeSingle();
-
-    isFollowing = !!follow;
-  }
-
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 text-white">
 
