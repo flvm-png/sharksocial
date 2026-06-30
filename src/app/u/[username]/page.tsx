@@ -39,7 +39,7 @@ export default async function PublicProfile({
         avatar_url
       )
     `)
-    .eq("user_id", profileId)
+    .eq("user_id", profileUserId)
     .order("created_at", { ascending: false });
 
   let isFollowing = false;
