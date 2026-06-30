@@ -49,7 +49,7 @@ export default async function PublicProfile({
       .from("follows")
       .select("*")
       .eq("follower_id", user.id)
-      .eq("following_id", profileId)
+      .eq("following_id", profileUserId)
       .maybeSingle();
 
     isFollowing = !!follow;
